@@ -15,7 +15,8 @@ const CustomWebcam = () => {
   };
 
   return (
-    <div className = "flex items-center justify-center">
+    <div className = "flex items-center justify-center mb-10 rounded">
+      
       {imgSrc ? (
         <img src={imgSrc} alt="webcam capture" />
       ) : (
@@ -23,8 +24,8 @@ const CustomWebcam = () => {
           audio={false}
           ref={webcamRef}
           screenshotFormat="image/jpeg"
-          width={800}
-          height={800}
+          width={900}
+          height={900}
           videoConstraints={{ exact: "environment" }} // Use back camera
         />
       )}
