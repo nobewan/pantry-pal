@@ -1,25 +1,22 @@
-import Dashboard from './components/Dashboard.jsx'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import NavTabs from './components/NavTabs.jsx'
 import Cards from './components/Cards.jsx'
 import Camera from './components/Camera.jsx'
-import Result from './components/Result.jsx'
-import WebcamCapture from './components/WebcamCapture.jsx'
-import Notifications from './components/Notifications.jsx'
 import FoodMonitor from './components/FoodMonitor.jsx'
 
-function App() {
-    return(
-        <>
-        <body className = "bg-slate-300"></body>
-        <Dashboard></Dashboard>
-        <Cards></Cards>
-        <Camera></Camera> {/* Placeholder for Cam */}
-        {/*<WebcamCapture></WebcamCapture>*/}
-        <Result></Result>
-        {/*<Notifications></Notifications>*/}
-        <FoodMonitor></FoodMonitor>
-
-        </>
-    )
+export default function App() {
+    return (
+      <>
+      <body className = "bg-slate-100"></body>
+      <Router>
+        <NavTabs />
+        <div className="p-6">
+          <Routes>
+            <Route path="/" element={<Cards />} />
+            <Route path="/foodMonitor" element={<FoodMonitor />} />
+          </Routes>
+        </div>
+      </Router>
+      </>
+    );
   }
-  
-  export default App
