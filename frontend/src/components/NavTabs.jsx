@@ -9,7 +9,7 @@ export default function NavTabs() {
     const activeIndex = routes.indexOf(location.pathname);
   
     return (
-      <div className="border-b bg-green-400 shadow-sm px-6 py-4">
+      <div className="bg-green-400 shadow-sm px-6 py-4">
         
         {/* Row container */}
         <div className="flex items-center">

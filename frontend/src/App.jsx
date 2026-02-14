@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import NavTabs from './components/NavTabs.jsx'
 import Cards from './components/Cards.jsx'
-import Camera from './components/Camera.jsx'
 import FoodMonitor from './components/FoodMonitor.jsx'
 
 export default function App() {

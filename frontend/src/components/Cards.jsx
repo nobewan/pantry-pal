@@ -1,5 +1,6 @@
 function Cards() {
 
+
   return (
   <div className='flex justify-around h-full items-center'>
     
@@ -23,7 +24,7 @@ function Cards() {
     <div className="bg-black m-10 h-100  w-150 rounded">
       <h1 className="text-white bg-slate-700 p-2">Camera</h1>
       <img
-            src="http://localhost:5000/video"
+            src=" "
             alt="Motion Detection Camera"
             className="w-full h-full object-cover"
           />
