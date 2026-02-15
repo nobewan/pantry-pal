@@ -30,14 +30,14 @@ export default function NavTabs() {
                 className="px-4 py-2 text-gray-700 font-medium cursor-pointer"
                 selectedClassName="text-blue-600 border-b-2 border-blue-600"
               >
-                1stTab
+                Dashboard
               </Tab>
   
               <Tab
                 className="px-4 py-2 text-gray-700 font-medium cursor-pointer"
                 selectedClassName="text-blue-600 border-b-2 border-blue-600"
               >
-                2ndTab
+                Analytics
               </Tab>
             </TabList>
           </Tabs>
