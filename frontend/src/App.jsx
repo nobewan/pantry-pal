@@ -3,6 +3,7 @@ import NavTabs from './components/NavTabs.jsx'
 import Cards from './components/Cards.jsx'
 import FoodMonitor from './components/FoodMonitor.jsx'
 
+
 export default function App() {
     return (
       <>
