@@ -2,162 +2,169 @@ import React, { useState, useEffect } from "react";
 import Plot from "react-plotly.js";
 
 function FoodMonitor() {
-  const [graphData, setGraphData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [metricsData, setMetricsData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // State for period and date
-  const [period, setPeriod] = useState("day"); // day, week, month
+  const [period, setPeriod] = useState("day");
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().slice(0, 10)
-  ); // YYYY-MM-DD
+  );
+  const [selectedTable, setSelectedTable] = useState("GREENBANANA");
 
-  // Fetch Snowflake data
-  useEffect(() => {
+  const shelves = [
+    { shelf: "Shelf 1", table: "GREENBANANA", label: "Green Banana" },
+    { shelf: "Shelf 2", table: "RIPE", label: "Ripe Banana" },
+    { shelf: "Shelf 3", table: "NORMAL", label: "Regular Banana" },
+    { shelf: "Shelf 4", table: null, label: null },
+    { shelf: "Shelf 5", table: null, label: null },
+    { shelf: "Shelf 6", table: null, label: null },
+  ];
+
+  const fetchData = () => {
     setLoading(true);
-    setError("");
+    setError(null);
 
-    fetch("http://localhost:5000/api/snowflake-data?table=GREENBANANA")
-      .then((res) => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        return res.json();
-      })
+    fetch(
+      `http://localhost:5000/api/snowflake-data?table=${selectedTable}&date=${selectedDate}&period=${period}`
+    )
+      .then((res) => res.json())
       .then((rows) => {
-        if (!Array.isArray(rows)) throw new Error("Invalid data format");
+        if (!Array.isArray(rows) || rows.length === 0) {
+          setMetricsData([]);
+          setLoading(false);
+          return;
+        }
 
-        // Build graph
-        const graph = [
+        setMetricsData([
           {
-            x: rows.map((row) => row.TIME),
-            y: rows.map((row) => row.TEMP),
-            type: "scatter",
-            mode: "lines+markers",
-            name: "Temperature",
-            line: { color: "red" },
+            name: "Temperature (°C)",
+            x: rows.map((r) => r.TIME),
+            y: rows.map((r) => r.TEMP),
+            color: "red",
+            unit: "°C",
           },
           {
-            x: rows.map((row) => row.TIME),
-            y: rows.map((row) => row.HUMIDITY),
-            type: "scatter",
-            mode: "lines+markers",
-            name: "Humidity",
-            line: { color: "blue" },
+            name: "Humidity (%)",
+            x: rows.map((r) => r.TIME),
+            y: rows.map((r) => r.HUMIDITY),
+            color: "blue",
+            unit: "%",
           },
           {
-            x: rows.map((row) => row.TIME),
-            y: rows.map((row) => row.GAS),
-            type: "scatter",
-            mode: "lines+markers",
-            name: "Gas Level",
-            line: { color: "green" },
+            name: "Gas Level (Ω)",
+            x: rows.map((r) => r.TIME),
+            y: rows.map((r) => r.GAS),
+            color: "green",
+            unit: "Ω",
           },
           {
-            x: rows.map((row) => row.TIME),
-            y: rows.map((row) => row.PRESSURE),
-            type: "scatter",
-            mode: "lines+markers",
-            name: "Pressure",
-            line: { color: "orange" },
+            name: "Pressure (hPa)",
+            x: rows.map((r) => r.TIME),
+            y: rows.map((r) => r.PRESSURE),
+            color: "orange",
+            unit: "hPa",
           },
-        ];
+        ]);
 
-        setGraphData(graph);
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Error fetching Snowflake data:", err);
-        setError("Failed to load data");
+        console.error(err);
+        setError("Failed to fetch data from server");
         setLoading(false);
       });
-  }, [period, selectedDate]); // Could filter later by period/date
-
-  // Change shelf colors
-  const handleButtonClick = (shelf) => {
-    if (graphData) {
-      const color = shelfColor(shelf);
-      const updated = graphData.map((d) => ({
-        ...d,
-        line: { ...d.line, color },
-      }));
-      setGraphData(updated);
-    }
   };
 
-  const shelfColor = (shelf) => {
-    const colors = {
-      "Shelf 1": "red",
-      "Shelf 2": "blue",
-      "Shelf 3": "green",
-      "Shelf 4": "orange",
-      "Shelf 5": "purple",
-      "Shelf 6": "yellow",
-    };
-    return colors[shelf] || "gray";
-  };
+  useEffect(() => {
+    fetchData();
+  }, [selectedTable, selectedDate, period]);
+
+  // Combine all metrics into one Plotly graph
+  const combinedGraphData = metricsData.map((metric) => ({
+    x: metric.x,
+    y: metric.y,
+    type: "scatter",
+    mode: "lines+markers",
+    name: metric.name,
+    line: { color: metric.color },
+    marker: { color: metric.color },
+    hovertemplate: `%{y} ${metric.unit} at %{x}<extra></extra>`,
+  }));
 
   return (
-    <div className="flex h-full gap-x-3 justify-around flex-wrap">
-      {/* Pantry Buttons */}
-      <div className="bg-white m-2 shadow-xl flex-[0.7] min-w-[250px]">
+    <div className="flex h-full gap-x-3 p-2 flex-wrap">
+      {/* Pantry */}
+      <div className="bg-white shadow-xl w-[250px] flex flex-col h-full overflow-auto">
         <h1 className="p-5 text-3xl font-bold">Pantry</h1>
-        <div className="grid p-10 grid-cols-1 grid-rows-3 gap-5 mb-10">
-          {["Shelf 1","Shelf 2","Shelf 3","Shelf 4","Shelf 5","Shelf 6"].map(
-            (shelf, i) => (
-              <button
-                key={i}
-                className="bg-gray-300 rounded-lg min-h-[3rem] cursor-pointer p-4 hover:bg-gray-400"
-                onClick={() => handleButtonClick(shelf)}
-              >
-                <h1 className="text-slate-950 font-semibold text-center m-2">
-                  {shelf}
-                </h1>
-                <h2 className="text-slate-800 text-2xl">Food {i + 1}</h2>
-              </button>
-            )
-          )}
+        <div className="grid p-6 grid-cols-1 grid-rows-3 gap-5 flex-1">
+          {shelves.map((item, i) => (
+            <button
+              key={i}
+              onClick={() => item.table && setSelectedTable(item.table)}
+              className={`bg-gray-300 rounded-lg min-h-[3rem] cursor-pointer p-4 hover:bg-gray-400 ${
+                item.table === selectedTable ? "ring-2 ring-green-500" : ""
+              }`}
+            >
+              <h1 className="text-slate-950 font-semibold text-center m-2">
+                {item.shelf}
+              </h1>
+              <h2 className="text-slate-800 text-2xl">
+                {item.label || `Food ${i + 1}`}
+              </h2>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Analysis and Graph */}
-      <div className="flex flex-col flex-1 min-w-[500px]">
-        <div className="bg-white m-2 shadow-xl flex flex-col">
-          <h1 className="p-5 text-3xl font-bold">Analysis Results</h1>
+      {/* Analysis / Graph */}
+      <div className="bg-white shadow-xl flex-1 flex flex-col h-full overflow-auto p-4 min-w-[500px]">
+        <h1 className="p-2 text-3xl font-bold">Analysis Results</h1>
 
-          {/* Period & Date Controls */}
-          <div className="flex p-10 gap-5 m-3 justify-center items-center flex-wrap">
-            {/* Period */}
-            <div className="bg-gray-300 rounded-lg min-h-[3rem] cursor-pointer p-4 flex flex-col items-center">
-              <label className="text-slate-950 font-semibold">Period:</label>
-              <select
-                value={period}
-                onChange={(e) => setPeriod(e.target.value)}
-                className="mt-2 p-1 rounded"
-              >
-                <option value="day">Daily</option>
-                <option value="week">Weekly</option>
-                <option value="month">Monthly</option>
-              </select>
-            </div>
-
-            {/* Date */}
-            <div className="bg-gray-300 rounded-lg min-h-[3rem] cursor-pointer p-4 flex flex-col items-center">
-              <label className="text-slate-950 font-semibold">Date:</label>
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="mt-2 p-1 rounded"
-              />
-            </div>
+        {/* Period & Date Controls */}
+        <div className="flex p-4 gap-5 justify-center items-center flex-wrap">
+          <div className="bg-gray-300 rounded-lg min-h-[3rem] cursor-pointer p-4 flex flex-col items-center">
+            <label className="text-slate-950 font-semibold">Period:</label>
+            <select
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              className="mt-2 p-1 rounded"
+            >
+              <option value="day">Daily</option>
+              <option value="week">Weekly</option>
+              <option value="month">Monthly</option>
+            </select>
           </div>
-
-          {/* Graph */}
-          <div className="bg-white m-10 h-[500px] w-full">
-            <h1 className="justify-center text-center mb-2">Graph</h1>
-            {loading && <p className="text-center text-gray-700">Loading graph...</p>}
-            {error && <p className="text-center text-red-600 font-semibold">{error}</p>}
-            {graphData && <Plot data={graphData} layout={{ autosize: true }} style={{ width: "100%", height: "100%" }} />}
+          <div className="bg-gray-300 rounded-lg min-h-[3rem] cursor-pointer p-4 flex flex-col items-center">
+            <label className="text-slate-950 font-semibold">Date:</label>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="mt-2 p-1 rounded"
+            />
           </div>
+        </div>
+
+        {/* Combined Graph */}
+        <div className="mt-4 h-[500px] w-full">
+          {loading && <p className="text-center">Loading...</p>}
+          {error && <p className="text-center text-red-600">{error}</p>}
+          {!loading && !error && combinedGraphData.length > 0 && (
+            <Plot
+              data={combinedGraphData}
+              layout={{
+                title: "Food Metrics",
+                xaxis: { title: "Time", tickangle: -45, automargin: true },
+                yaxis: { title: "Value", automargin: true },
+                margin: { t: 50, b: 50, l: 50, r: 50 },
+                autosize: true,
+                legend: { orientation: "h", x: 0, y: 1.1 },
+              }}
+              style={{ width: "100%", height: "100%" }}
+              useResizeHandler={true}
+            />
+          )}
         </div>
       </div>
     </div>
