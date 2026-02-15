@@ -20,7 +20,7 @@ For website run:
 1. **Run node.js**:
    - cd backend
    - node server.js
-2. **Run frontend**
+2. **Run frontend to go to website**
    - cd frontend
    - npm run dev
 
