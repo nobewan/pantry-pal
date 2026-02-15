@@ -13,6 +13,13 @@ We wanted to find how to detect food spoilage using a gas sensor in real time so
    - BME 688 Gas sensor: Humidity, temperature, and gas resistance metrics; detect VOCS emitted during food spoilage
    - LCD Display: Shows all metrics and status of food
 
+# **WHAT DATA WE TRY TO FIND
+The temperature, gas level, pressure, and humidity of a food item
+
+# **WHAT IT WOULD LOOK LIKE**
+- On the first page of the website you'll see a video stream from the camera that scans a food item.  It would then display its data over time on the left of it.
+- On the second page a pantry of all the food items that the camera would scan and when clicking on that food item it would display the analysis results of the data over time using a graph. 
+
 
 # **HOW CAN YOU USE IT**
 For website run: 
