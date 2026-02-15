@@ -2,14 +2,13 @@ import { useState, useEffect } from "react";
 
 function Cards() {
   const [metrics, setMetrics] = useState([]);
+  const [table, setTable] = useState("PANTRYPAL2"); // Default table
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/snowflake-data")
-
+    fetch(`http://localhost:5000/api/snowflake-data?table=${table}`)
       .then(res => res.json())
       .then(data => {
         if (data.length > 0) {
-          // Only show the latest row
           const latest = data[data.length - 1];
           const formatted = [
             { name: "Temperature", value: latest.TEMP },
@@ -18,14 +17,32 @@ function Cards() {
             { name: "Pressure", value: latest.PRESSURE }
           ];
           setMetrics(formatted);
+        } else {
+          setMetrics([]);
         }
       })
       .catch(err => console.error("Error fetching metrics:", err));
-  }, []);
+  }, [table]); // Re-fetch when table changes
 
   return (
-    <div className="flex justify-around h-full items-center">
+    <div className="flex justify-around h-full items-start">
+      {/* Metrics Section */}
       <div className="flex flex-col">
+        {/* Table Selector */}
+        <div className="mb-4">
+          <label className="mr-2 font-semibold">Select Table:</label>
+          <select
+            className="border rounded p-1"
+            value={table}
+            onChange={(e) => setTable(e.target.value)}
+          >
+            {["PANTRYPAL2","GREENBANANA",,"RIPE","PANTRYPAL3"].map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Metrics Cards */}
         {metrics.length > 0 ? (
           metrics.map((metric, index) => (
             <div
@@ -43,8 +60,9 @@ function Cards() {
         )}
       </div>
 
-      <div className="bg-black m-10 h-[24rem] w-[36rem] rounded">
-        <h1 className="text-white bg-slate-700 p-2">Camera</h1>
+      {/* Camera Section */}
+      <div className="bg-black m-10 h-[24rem] w-[36rem] rounded flex flex-col">
+        <h1 className="text-white bg-slate-700 p-2 text-center">Camera</h1>
         <img
           src=" "
           alt="Motion Detection Camera"

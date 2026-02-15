@@ -4,12 +4,14 @@ import MyPlotComponent from "./MyPlotComponent.jsx";
 function FoodMonitor() {
   const [graphData, setGraphData] = useState(null);
 
+  // State for Period and Date
+  const [period, setPeriod] = useState("day"); // day, week, month
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10)); // YYYY-MM-DD
+
   useEffect(() => {
     fetch("http://localhost:5000/api/snowflake-data")
-
       .then(res => res.json())
       .then(rows => {
-        // Map Snowflake rows to Plotly traces
         const graph = [
           {
             x: rows.map(row => row.TIME),
@@ -51,9 +53,9 @@ function FoodMonitor() {
 
   const handleButtonClick = (shelf) => {
     if (graphData) {
-      const filtered = graphData.map(d => ({ 
-        ...d, 
-        marker: { color: shelfColor(shelf) } 
+      const filtered = graphData.map(d => ({
+        ...d,
+        marker: { color: shelfColor(shelf) }
       }));
       setGraphData(filtered);
     }
@@ -94,14 +96,32 @@ function FoodMonitor() {
       <div className="flex flex-col flex-1">
         <div className="bg-white m-2 shadow-xl flex flex-col">
           <h1 className="p-5 text-3xl font-bold">Analysis Results</h1>
+
+          {/* Period and Date controls */}
           <div className="flex p-10 gap-5 m-3 justify-center items-center">
-            <div className="bg-gray-300 rounded-lg min-h-[3rem] cursor-pointer p-4 mr-2">
-              <h1 className="text-slate-950 font-semibold text-center">Average:</h1>
-              <h1 className="text-slate-950 font-semibold text-center text-xl">2:00</h1>
+            {/* Period */}
+            <div className="bg-gray-300 rounded-lg min-h-[3rem] cursor-pointer p-4 mr-2 flex flex-col items-center">
+              <label className="text-slate-950 font-semibold">Period:</label>
+              <select
+                value={period}
+                onChange={(e) => setPeriod(e.target.value)}
+                className="mt-2 p-1 rounded"
+              >
+                <option value="day">Daily</option>
+                <option value="week">Weekly</option>
+                <option value="month">Monthly</option>
+              </select>
             </div>
-            <div className="bg-gray-300 rounded-lg min-h-[3rem] cursor-pointer p-4 ml-2">
-              <h1 className="text-slate-950 font-semibold text-center">Exact</h1>
-              <h1 className="text-slate-950 font-semibold text-center text-xl">2:34</h1>
+
+            {/* Date */}
+            <div className="bg-gray-300 rounded-lg min-h-[3rem] cursor-pointer p-4 ml-2 flex flex-col items-center">
+              <label className="text-slate-950 font-semibold">Date:</label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="mt-2 p-1 rounded"
+              />
             </div>
           </div>
 

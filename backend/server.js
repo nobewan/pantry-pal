@@ -6,9 +6,12 @@ const snowflake = require('snowflake-sdk');
 const app = express();
 const PORT = 5000;
 
-// CORS setup
+// ------------------ Whitelist of allowed tables ------------------
+const allowedTables = ["PANTRYPAL2", "GREENBANANA", "BANANA", "RIPE", "PANTRYPAL3"];
+
+// ------------------ CORS Setup ------------------
 app.use(cors({
-  origin: "http://localhost:5173", // React dev server
+  origin: "http://localhost:5173",
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
@@ -16,7 +19,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// Snowflake connection
+// ------------------ Snowflake Connection ------------------
 const connection = snowflake.createConnection({
   account: process.env.SNOWFLAKE_ACCOUNT,
   username: process.env.SNOWFLAKE_USER,
@@ -26,38 +29,40 @@ const connection = snowflake.createConnection({
   schema: process.env.SNOWFLAKE_SCHEMA
 });
 
-// Connect at server start
 connection.connect((err, conn) => {
-  if (err) {
-    console.error('Unable to connect to Snowflake: ', err);
-  } else {
-    console.log('Connected to Snowflake successfully!');
-  }
+  if (err) console.error('Unable to connect to Snowflake: ', err);
+  else console.log('Connected to Snowflake successfully!');
 });
 
-// API route
-app.get('/api/snowflake-data', (req, res) => {
-  const query = 'SELECT TIME, GAS, TEMP, HUMIDITY, PRESSURE FROM PANTRYPAL2 LIMIT 50';
-
-  // Ensure Snowflake callback sets CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
+// ------------------ Helper Function ------------------
+function fetchTableData(tableName, res) {
+  const query = `SELECT TIME, GAS, TEMP, HUMIDITY, PRESSURE FROM ${tableName} LIMIT 150`;
 
   connection.execute({
     sqlText: query,
     complete: (err, stmt, rows) => {
       if (err) {
-        console.error('Snowflake query error: ', err);
-        res.status(500).json({ error: 'Failed to fetch data' });
+        console.error(`Snowflake query error (${tableName}): `, err);
+        res.status(500).json({ error: `Failed to fetch data from ${tableName}` });
       } else {
         res.json(rows);
       }
     }
   });
+}
+
+// ------------------ API Route ------------------
+// Example: GET /api/snowflake-data?table=RIPE
+app.get('/api/snowflake-data', (req, res) => {
+  const table = req.query.table;
+
+  if (!table) return res.status(400).json({ error: "Missing 'table' query parameter" });
+  if (!allowedTables.includes(table)) return res.status(400).json({ error: "Invalid table" });
+
+  fetchTableData(table, res);
 });
 
-// Start server
+// ------------------ Start Server ------------------
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
 });
