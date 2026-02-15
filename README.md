@@ -1,4 +1,4 @@
-
+<img>frontend/public/PantryPal.png<img>
 
 # **Project name: Pantry Pal**
 
