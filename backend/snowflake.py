@@ -1,3 +1,4 @@
+"""
 import os
 import snowflake.connector
 from dotenv import load_dotenv
@@ -33,10 +34,11 @@ finally:
         conn.close()
         print("Connection closed.")
 
-file_path = '/backend/bme688_log.txt'
+file_path = '/backend/bme688_lo_csv'
 stage_name = 'my_stage'
 try:
     cur.execute(f"PUT file://{file_path} @{stage_name} auto_compress=true")
     print("File uploaded to stage!")
 except Exception as e:
     print(f"Error uploading file: {e}")
+"""
