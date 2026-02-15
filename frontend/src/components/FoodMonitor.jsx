@@ -15,7 +15,7 @@ function FoodMonitor() {
   const shelves = [
     { shelf: "Shelf 1", table: "GREENBANANA", label: "Green Banana" },
     { shelf: "Shelf 2", table: "RIPE", label: "Ripe Banana" },
-    { shelf: "Shelf 3", table: "NORMAL", label: "Regular Banana" },
+    { shelf: "Shelf 3", table: "BANANA", label: "Regular Banana" },
     { shelf: "Shelf 4", table: null, label: null },
     { shelf: "Shelf 5", table: null, label: null },
     { shelf: "Shelf 6", table: null, label: null },
